@@ -27,5 +27,5 @@ interface IProofOfX {
 
     function mintByOwner(uint16 exhibitionIndex, string memory minterName, address toAddress) external;
 
-    function mint(uint16 exhibitionIndex, string memory minterName) external;
+    function mint(uint16 exhibitionIndex, string memory minterName, bytes32 hash, bytes memory sig) external;
 }

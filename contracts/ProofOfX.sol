@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IProofOfX} from "./interfaces/IProofOfX.sol";
 import {IRenderer} from "./interfaces/IRenderer.sol";
 import {Util} from "./Util.sol";
@@ -18,6 +19,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
     uint16 public totalExhibitions;
     mapping(uint16 => IProofOfX.Exhibition) public exhibitions;
     mapping(uint256 => IProofOfX.TokenAttribute) public tokenAttributes;
+    mapping(bytes32 => bool) public mintedHash;
 
     constructor() ERC721("ProofOfX", "POX") {}
 
@@ -46,7 +48,12 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         _mint(toAddress, tokenId);
     }
 
-    function mint(uint16 exhibitionIndex, string memory minterName) external {
+    function mint(uint16 exhibitionIndex, string memory minterName, bytes32 hash, bytes memory sig) external {
+        require(keccak256(abi.encodePacked(_msgSender(), exhibitionIndex, address(this))) == hash, "invalid hash");
+        require(ECDSA.recover(ECDSA.toEthSignedMessageHash(hash), sig) == owner(), "invalid sig");
+        require(mintedHash[hash] == false, "minted hash");
+        mintedHash[hash] = true;
+
         uint256 tokenId = ++totalSupply;
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
