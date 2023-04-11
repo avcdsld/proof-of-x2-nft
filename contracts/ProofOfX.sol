@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IProofOfX} from "./interfaces/IProofOfX.sol";
 import {IRenderer} from "./interfaces/IRenderer.sol";
@@ -43,7 +42,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         uint256 tokenId = ++totalSupply;
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
-        bytes32 seed = sha256(abi.encodePacked(blockhash(block.number - 1), toAddress));
+        bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), toAddress));
         tokenAttributes[tokenId] = IProofOfX.TokenAttribute(minterName, minterAddress, mintedAt, bytes32ToString(seed), exhibitionIndex);
         _mint(toAddress, tokenId);
     }
@@ -57,7 +56,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         uint256 tokenId = ++totalSupply;
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
-        bytes32 seed = sha256(abi.encodePacked(blockhash(block.number - 1), minterAddress));
+        bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), minterAddress));
         tokenAttributes[tokenId] = IProofOfX.TokenAttribute(minterName, minterAddress, mintedAt, bytes32ToString(seed), exhibitionIndex);
         _mint(_msgSender(), tokenId);
     }
