@@ -38,16 +38,16 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         _setDefaultRoyalty(royaltyReceiver, royaltyFeeNumerator);
     }
 
-    function mintByOwner(uint16 exhibitionIndex, string memory minterName, address toAddress) external onlyOwner {
+    function mintByOwner(uint16 exhibitionIndex, string memory name, address toAddress) external onlyOwner {
         uint256 tokenId = ++totalSupply;
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), toAddress));
-        tokenAttributes[tokenId] = IProofOfX.TokenAttribute(minterName, minterAddress, mintedAt, bytes32ToString(seed), exhibitionIndex);
+        tokenAttributes[tokenId] = IProofOfX.TokenAttribute(name, minterAddress, mintedAt, bytes32ToString(seed), exhibitionIndex);
         _mint(toAddress, tokenId);
     }
 
-    function mint(uint16 exhibitionIndex, string memory minterName, bytes32 hash, bytes memory sig) external {
+    function mint(uint16 exhibitionIndex, string memory name, bytes32 hash, bytes memory sig) external {
         require(keccak256(abi.encodePacked(_msgSender(), exhibitionIndex, address(this))) == hash, "invalid hash");
         require(ECDSA.recover(ECDSA.toEthSignedMessageHash(hash), sig) == owner(), "invalid sig");
         require(mintedHash[hash] == false, "minted hash");
@@ -57,7 +57,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), minterAddress));
-        tokenAttributes[tokenId] = IProofOfX.TokenAttribute(minterName, minterAddress, mintedAt, bytes32ToString(seed), exhibitionIndex);
+        tokenAttributes[tokenId] = IProofOfX.TokenAttribute(name, minterAddress, mintedAt, bytes32ToString(seed), exhibitionIndex);
         _mint(_msgSender(), tokenId);
     }
 
@@ -89,8 +89,8 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
                 Strings.toString(uint256(exhibition.startTime)),
                 '"},{"display_type":"date","trait_type":"Exhibition End Time","value":"',
                 Strings.toString(uint256(exhibition.endTime)),
-                '"},{"trait_type":"Minter Name","value":"',
-                tokenAttribute.minterName,
+                '"},{"trait_type":"Name","value":"',
+                tokenAttribute.name,
                 '"},{"trait_type":"Minter Address","value":"',
                 Strings.toHexString(tokenAttribute.minterAddress),
                 '"},{"display_type":"date","trait_type":"Minted At","value":"',

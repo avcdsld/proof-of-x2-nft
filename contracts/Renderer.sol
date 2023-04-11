@@ -43,7 +43,7 @@ contract Renderer is IRenderer, Ownable {
             "\n<script>\n",
             "var attribute = {\n",
             '  hash: "0x', tokenAttribute.seed, '",\n',
-            '  name: "', tokenAttribute.minterName, '",\n', // TODO: escape
+            '  name: "', tokenAttribute.name, '",\n', // TODO: escape
             '  mintedAt: ', Strings.toString(uint256(tokenAttribute.mintedAt)), "\n",
             "}\n",
             "</script>\n",

@@ -3,7 +3,7 @@ pragma solidity ^0.8.18;
 
 interface IProofOfX {
     struct TokenAttribute {
-        string minterName;
+        string name;
         address minterAddress;
         uint64 mintedAt;
         string seed;
@@ -25,7 +25,7 @@ interface IProofOfX {
 
     function setRoyalty(address royaltyReceiver, uint96 royaltyFeeNumerator) external;
 
-    function mintByOwner(uint16 exhibitionIndex, string memory minterName, address toAddress) external;
+    function mintByOwner(uint16 exhibitionIndex, string memory name, address toAddress) external;
 
-    function mint(uint16 exhibitionIndex, string memory minterName, bytes32 hash, bytes memory sig) external;
+    function mint(uint16 exhibitionIndex, string memory name, bytes32 hash, bytes memory sig) external;
 }
