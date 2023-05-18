@@ -9,47 +9,57 @@ import {IRenderer} from "./interfaces/IRenderer.sol";
 import {IProofOfX} from "./interfaces/IProofOfX.sol";
 
 contract Renderer is IRenderer, Ownable {
-    string public baseImageUrl;
-    string public animationUrlAsHttp;
+    string public imageBaseUrl;
+    string public dataBaseUrl;
+    string public scriptPath;
+    string public cssPath;
 
     constructor() {
-        // TODO: remove
-        baseImageUrl = "https://bafybeict7ckaknrmk24erku33ip5brq3nw7r2rj35pjhbbfcy4kxhfcfvq.ipfs.nftstorage.link/#";
-        animationUrlAsHttp = "https://kitasenjudesign.com/proofofx/01/";
+        // TODO: update
+        imageBaseUrl = "https://bafybeict7ckaknrmk24erku33ip5brq3nw7r2rj35pjhbbfcy4kxhfcfvq.ipfs.nftstorage.link/#";
+        dataBaseUrl = "https://ara.mypinata.cloud/ipfs/QmVuLuULVHMJjJS9Mu5FeYMuFpFcRJEnU92LpYMwiuUUBx/";
+        scriptPath = "js/mainvisual.js";
+        cssPath = "css/mainvisual.css";
     }
 
-    function setBaseImageUrl(string memory url) external onlyOwner {
-        baseImageUrl = url;
+    function setImageBaseUrl(string memory url) external onlyOwner {
+        imageBaseUrl = url;
     }
 
-    function setAnimationUrlAsHttp(string memory url) external onlyOwner {
-        animationUrlAsHttp = url;
+    function setDataUrl(string memory _dataBaseUrl, string memory _scriptPath, string memory _cssPath) external onlyOwner {
+        dataBaseUrl = _dataBaseUrl;
+        scriptPath = _scriptPath;
+        cssPath = _cssPath;
     }
 
     function imageUrl(uint256 tokenId) external view returns (string memory) {
-        return string.concat(baseImageUrl, Strings.toString(tokenId));
+        return string.concat(imageBaseUrl, Strings.toString(tokenId));
     }
 
     function animationUrl(uint256 /* tokenId */, IProofOfX.TokenAttribute memory tokenAttribute) external view returns (string memory) {
-        if (bytes(animationUrlAsHttp).length > 0) {
-            return animationUrlAsHttp;
-        }
         string memory imageData = string.concat(
-            "<html>",
+            "<!DOCTYPE html>",
+            '<html lang="en">',
             "<head>",
-            '<meta name="viewport" width="device-width," initial-scale="1.0," maximum-scale="1.0," user-scalable="0" />',
-            "<style>body { padding: 0; margin: 0; }</style>",
-            // externalScript,
-            "\n<script>\n",
+            '<meta charset="UTF-8">',
+            '<meta name="viewport" content="width=device-width, initial-scale=0.5">',
+            "<title>PROOF OF X</title>",
+            '\n<script type="text/javascript">\n',
             "var attribute = {\n",
             '  hash: "0x', tokenAttribute.seed, '",\n',
             '  name: "', tokenAttribute.name, '",\n', // TODO: escape
             '  mintedAt: ', Strings.toString(uint256(tokenAttribute.mintedAt)), "\n",
             "}\n",
             "</script>\n",
+            '<style type="text/css">body { margin: 0; padding: 0; background-color: #000; font-family: Helvetica, Arial, sans-serif; overflow: hidden; }</style>',
+            '<link rel="stylesheet" href="', dataBaseUrl, cssPath, '">',
             "</head>",
             "<body>",
-            '<script src="https://ipfs.io/ipfs/QmekTQiZXha9KoPimKgwbgkK5Rj2qRJp7ubqJ2w5fgnn5G"></script>',
+            '<script type="text/javascript" src="', dataBaseUrl, scriptPath, '" id="mainvisual_js" data-mode="nft" data-baseurl="', dataBaseUrl, '"></script>',
+            '<div id="mainvisual_title"></div>',
+            '<div class="mainvisual_container">',
+            '<canvas id="mainvisual_webgl"></canvas>',
+            '</div>',
             "</body>",
             "</html>"
         );
