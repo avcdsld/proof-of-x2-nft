@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 describe("Deploy", function () {
   it("should success", async function () {
-    const [deployer, user1] = await ethers.getSigners();
+    const [deployer, user1, user2] = await ethers.getSigners();
 
     const Renderer = await ethers.getContractFactory("Renderer");
     const renderer = await Renderer.deploy();
@@ -66,6 +66,24 @@ describe("Deploy", function () {
             await expect(proofOfX.connect(user1).mint(exhibitionIndex, name, hash, invalidSig)).to.be.revertedWith(
               "invalid sig"
             );
+          });
+        });
+
+        describe("Get token attributes", function () {
+          it("should success", async function () {
+            const name = "PoX太郎 - Get token attributes";
+            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, user2.address);
+            const txReceipt = await txMint.wait();
+            expect(await txReceipt.status).to.equal(1);
+
+            const totalSupply = (await proofOfX.totalSupply()).toNumber();
+            let tokenIds = [];
+            for (let i = 1; i <= totalSupply; i++) {
+              tokenIds.push(i);
+            }
+            const result = await proofOfX.getTokenAttributes(tokenIds);
+            expect(result.length).to.equal(tokenIds.length);
+            expect(result[tokenIds.length - 1].name).to.equal(name);
           });
         });
       });
