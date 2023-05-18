@@ -56,7 +56,6 @@ describe("Deploy", function () {
             const txMint = await proofOfX.connect(user1).mint(exhibitionIndex, name, mintCodeHash, hash, sig);
             const txReceipt = await txMint.wait();
             expect(await txReceipt.status).to.equal(1);
-            console.log(await proofOfX.tokenURI(1));
 
             await expect(proofOfX.connect(user1).mint(exhibitionIndex, name, mintCodeHash, hash, sig)).to.be.revertedWith(
               "minted hash"
@@ -76,6 +75,51 @@ describe("Deploy", function () {
             await expect(proofOfX.connect(user1).mint(exhibitionIndex, name, mintCodeHash, hash, invalidSig)).to.be.revertedWith(
               "invalid sig"
             );
+          });
+        });
+
+        describe("Buy", function () {
+          it("should success", async function () {
+            const price = ethers.utils.parseUnits("0.01", "ether");
+            const enabled = true;
+            const txSetSale = await proofOfX.setSale(exhibitionIndex, price, enabled);
+            const txSetSaleReceipt = await txSetSale.wait();
+            expect(await txSetSaleReceipt.status).to.equal(1);
+
+            const txBuy = await proofOfX.connect(user1).buy(user1.address, { value: price });
+            const txBuyReceipt = await txBuy.wait();
+            expect(await txBuyReceipt.status).to.equal(1);
+          });
+
+          it("should false - wrong price", async function () {
+            const price = ethers.utils.parseUnits("0.01", "ether");
+            const enabled = true;
+            const txSetSale = await proofOfX.setSale(exhibitionIndex, price, enabled);
+            const txSetSaleReceipt = await txSetSale.wait();
+            expect(await txSetSaleReceipt.status).to.equal(1);
+
+            const wrongPrice = ethers.utils.parseUnits("0.0001", "ether");
+            await expect(proofOfX.connect(user1).buy(user1.address, { value: wrongPrice })).to.be.revertedWith(
+              "invalid value"
+            );
+          });
+
+          describe("Withdraw ETH", function () {
+            it("should success", async function () {
+              expect(await ethers.provider.getBalance(proofOfX.address)).to.be.greaterThan(0);
+
+              const txWithdrawETH = await proofOfX.withdrawETH(deployer.address);
+              const txReceipt = await txWithdrawETH.wait();
+              expect(await txReceipt.status).to.equal(1);
+
+              expect(await ethers.provider.getBalance(proofOfX.address)).to.equal(0);
+            });
+
+            it("should false - not owner", async function () {
+              await expect(proofOfX.connect(user1).withdrawETH(user1.address)).to.be.revertedWith(
+                "Ownable: caller is not the owner"
+              );
+            });
           });
         });
 

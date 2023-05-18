@@ -25,7 +25,13 @@ interface IProofOfX {
 
     function setRoyalty(address royaltyReceiver, uint96 royaltyFeeNumerator) external;
 
+    function setSale(uint16 exhibitionIndex, uint256 price, bool enabled) external;
+
+    function withdrawETH(address payable recipient) external;
+
     function mintByOwner(uint16 exhibitionIndex, string memory name, address toAddress, bytes32 hash) external;
 
     function mint(uint16 exhibitionIndex, string memory name, bytes32 mintCodeHash, bytes32 hash, bytes memory sig) external;
+
+    function buy(address toAddress) external payable;
 }

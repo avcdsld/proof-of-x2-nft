@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IProofOfX} from "./interfaces/IProofOfX.sol";
 import {IRenderer} from "./interfaces/IRenderer.sol";
@@ -15,10 +16,13 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
     string public description;
     string public baseExternalUrl;
 
-    uint16 public totalExhibitions;
     mapping(uint16 => IProofOfX.Exhibition) public exhibitions;
     mapping(uint256 => IProofOfX.TokenAttribute) public tokenAttributes;
     mapping(bytes32 => bool) public mintedHash;
+
+    uint16 public saleExhibitionIndex;
+    uint256 public salePrice;
+    bool public saleEnabled;
 
     constructor() ERC721("ProofOfX", "POX") {}
 
@@ -36,6 +40,16 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
 
     function setRoyalty(address royaltyReceiver, uint96 royaltyFeeNumerator) external onlyOwner {
         _setDefaultRoyalty(royaltyReceiver, royaltyFeeNumerator);
+    }
+
+    function setSale(uint16 exhibitionIndex, uint256 price, bool enabled) external onlyOwner {
+        saleExhibitionIndex = exhibitionIndex;
+        salePrice =  price;
+        saleEnabled = enabled;
+    }
+
+    function withdrawETH(address payable recipient) external onlyOwner {
+        Address.sendValue(recipient, address(this).balance);
     }
 
     function mintByOwner(uint16 exhibitionIndex, string memory name, address toAddress, bytes32 hash) external onlyOwner {
@@ -62,6 +76,19 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), minterAddress));
         tokenAttributes[tokenId] = IProofOfX.TokenAttribute(name, minterAddress, mintedAt, bytes32ToString(seed), exhibitionIndex);
         _mint(_msgSender(), tokenId);
+    }
+
+    function buy(address toAddress) external payable {
+        require(saleEnabled, "not on sale");
+        require(msg.value == salePrice, "invalid value");
+
+        uint256 tokenId = ++totalSupply;
+        string memory name = "Anonymous";
+        address minterAddress = _msgSender();
+        uint64 mintedAt = uint64(block.timestamp);
+        bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), toAddress));
+        tokenAttributes[tokenId] = IProofOfX.TokenAttribute(name, minterAddress, mintedAt, bytes32ToString(seed), saleExhibitionIndex);
+        _mint(toAddress, tokenId);
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
