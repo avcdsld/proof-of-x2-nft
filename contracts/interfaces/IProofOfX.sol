@@ -25,7 +25,7 @@ interface IProofOfX {
 
     function setRoyalty(address royaltyReceiver, uint96 royaltyFeeNumerator) external;
 
-    function mintByOwner(uint16 exhibitionIndex, string memory name, address toAddress) external;
+    function mintByOwner(uint16 exhibitionIndex, string memory name, address toAddress, bytes32 hash) external;
 
-    function mint(uint16 exhibitionIndex, string memory name, bytes32 hash, bytes memory sig) external;
+    function mint(uint16 exhibitionIndex, string memory name, bytes32 mintedCodeHash, bytes32 hash, bytes memory sig) external;
 }

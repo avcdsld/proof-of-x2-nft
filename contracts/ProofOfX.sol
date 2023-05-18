@@ -38,7 +38,10 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         _setDefaultRoyalty(royaltyReceiver, royaltyFeeNumerator);
     }
 
-    function mintByOwner(uint16 exhibitionIndex, string memory name, address toAddress) external onlyOwner {
+    function mintByOwner(uint16 exhibitionIndex, string memory name, address toAddress, bytes32 hash) external onlyOwner {
+        require(mintedHash[hash] == false, "minted hash");
+        mintedHash[hash] = true;
+
         uint256 tokenId = ++totalSupply;
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
@@ -47,8 +50,8 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         _mint(toAddress, tokenId);
     }
 
-    function mint(uint16 exhibitionIndex, string memory name, bytes32 hash, bytes memory sig) external {
-        require(keccak256(abi.encodePacked(_msgSender(), exhibitionIndex, address(this))) == hash, "invalid hash");
+    function mint(uint16 exhibitionIndex, string memory name, bytes32 mintCodeHash, bytes32 hash, bytes memory sig) external {
+        require(keccak256(abi.encodePacked(_msgSender(), mintCodeHash)) == hash, "invalid hash");
         require(ECDSA.recover(ECDSA.toEthSignedMessageHash(hash), sig) == owner(), "invalid sig");
         require(mintedHash[hash] == false, "minted hash");
         mintedHash[hash] = true;

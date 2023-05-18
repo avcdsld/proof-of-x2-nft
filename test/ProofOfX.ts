@@ -26,7 +26,10 @@ describe("Deploy", function () {
         describe("Mint by owner", function () {
           it("should success", async function () {
             const name = "PoX太郎";
-            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, user1.address);
+            const mintCode = "abcdef - Mint by owner";
+            const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
+            const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
+            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, user1.address, hash);
             const txReceipt = await txMint.wait();
             expect(await txReceipt.status).to.equal(1);
             console.log(await proofOfX.tokenURI(1));
@@ -34,7 +37,10 @@ describe("Deploy", function () {
 
           it("should false - wrong owner", async function () {
             const name = "PoX太郎";
-            await expect(proofOfX.connect(user1).mintByOwner(exhibitionIndex, name, user1.address)).to.be.revertedWith(
+            const mintCode = "abcdef - Mint by owner 2";
+            const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
+            const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
+            await expect(proofOfX.connect(user1).mintByOwner(exhibitionIndex, name, user1.address, hash)).to.be.revertedWith(
               "Ownable: caller is not the owner"
             );
           });
@@ -43,27 +49,31 @@ describe("Deploy", function () {
         describe("Mint by user", function () {
           it("should success", async function () {
             const name = "PoX太郎";
-            const hash = ethers.utils.solidityKeccak256(["address", "uint16", "address"], [user1.address, exhibitionIndex, proofOfX.address])
+            const mintCode = "abcdef - Mint by user";
+            const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
+            const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
             const sig = await deployer.signMessage(ethers.utils.arrayify(hash));
-            const txMint = await proofOfX.connect(user1).mint(exhibitionIndex, name, hash, sig);
+            const txMint = await proofOfX.connect(user1).mint(exhibitionIndex, name, mintCodeHash, hash, sig);
             const txReceipt = await txMint.wait();
             expect(await txReceipt.status).to.equal(1);
             console.log(await proofOfX.tokenURI(1));
 
-            await expect(proofOfX.connect(user1).mint(exhibitionIndex, name, hash, sig)).to.be.revertedWith(
+            await expect(proofOfX.connect(user1).mint(exhibitionIndex, name, mintCodeHash, hash, sig)).to.be.revertedWith(
               "minted hash"
             );
           });
 
           it("should false - invalid hash/sig", async function () {
             const name = "PoX太郎";
-            const hash = ethers.utils.solidityKeccak256(["address", "uint16", "address"], [user1.address, exhibitionIndex, proofOfX.address])
-            const invalidHash = ethers.utils.solidityKeccak256(["string"], ["for invalid sig"])
+            const mintCode = "abcdef - Mint by user 2";
+            const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
+            const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
+            const invalidHash = ethers.utils.solidityKeccak256(["string"], ["for invalid sig"]);
             const invalidSig = await deployer.signMessage(ethers.utils.arrayify(invalidHash));
-            await expect(proofOfX.connect(user1).mint(exhibitionIndex, name, invalidHash, invalidSig)).to.be.revertedWith(
+            await expect(proofOfX.connect(user1).mint(exhibitionIndex, name, mintCodeHash, invalidHash, invalidSig)).to.be.revertedWith(
               "invalid hash"
             );
-            await expect(proofOfX.connect(user1).mint(exhibitionIndex, name, hash, invalidSig)).to.be.revertedWith(
+            await expect(proofOfX.connect(user1).mint(exhibitionIndex, name, mintCodeHash, hash, invalidSig)).to.be.revertedWith(
               "invalid sig"
             );
           });
@@ -72,7 +82,10 @@ describe("Deploy", function () {
         describe("Get token attributes", function () {
           it("should success", async function () {
             const name = "PoX太郎 - Get token attributes";
-            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, user2.address);
+            const mintCode = "abcdef - Get token attributes";
+            const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
+            const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
+            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, user2.address, hash);
             const txReceipt = await txMint.wait();
             expect(await txReceipt.status).to.equal(1);
 
