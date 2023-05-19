@@ -138,8 +138,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
     function getTokenAttributes(uint256[] memory tokenIds) public view returns (IProofOfX.TokenAttribute[] memory) {
         IProofOfX.TokenAttribute[] memory result = new IProofOfX.TokenAttribute[](tokenIds.length);
         for (uint256 i = 0; i < tokenIds.length; i++) {
-            IProofOfX.TokenAttribute memory tokenAttribute = tokenAttributes[tokenIds[i]];
-            result[i] = tokenAttribute;
+            result[i] = tokenAttributes[tokenIds[i]];
         }
         return result;
     }
