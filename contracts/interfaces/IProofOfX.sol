@@ -4,9 +4,10 @@ pragma solidity ^0.8.18;
 interface IProofOfX {
     struct TokenAttribute {
         string name;
+        string role;
         address minterAddress;
         uint64 mintedAt;
-        string seed;
+        bytes32 seed;
         uint16 exhibitionIndex;
     }
 
@@ -29,7 +30,7 @@ interface IProofOfX {
 
     function withdrawETH(address payable recipient) external;
 
-    function mintByOwner(uint16 exhibitionIndex, string memory name, address toAddress, bytes32 hash) external;
+    function mintByOwner(uint16 exhibitionIndex, string memory name, string memory role, address toAddress, bytes32 hash) external;
 
     function mint(uint16 exhibitionIndex, string memory name, bytes32 mintCodeHash, bytes32 hash, bytes memory sig) external;
 

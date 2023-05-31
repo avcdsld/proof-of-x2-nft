@@ -1,4 +1,3 @@
-// import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
@@ -6,8 +5,10 @@ describe("Deploy", function () {
   it("should success", async function () {
     const [deployer, user1, user2] = await ethers.getSigners();
 
+    const imageBaseUrl = "https://ara.mypinata.cloud/ipfs/QmdvFCsYyUdf3W8qS9neWKA3Cc8SZoSpdCnB2ErcLvnBDD/#";
+    const dataBaseUrl = "https://ara.mypinata.cloud/ipfs/QmTJ525CheYELeiuPiBWTczrEt7bn8ExgqAAHv4HcLzRqn/";
     const Renderer = await ethers.getContractFactory("Renderer");
-    const renderer = await Renderer.deploy();
+    const renderer = await Renderer.deploy(imageBaseUrl, dataBaseUrl);
 
     const ProofOfX = await ethers.getContractFactory("ProofOfX");
     const proofOfX = await ProofOfX.deploy();
@@ -16,7 +17,7 @@ describe("Deploy", function () {
       it("should success", async function () {
         const currentTimestampInSeconds = Math.round(Date.now() / 1000);
         const exhibitionIndex = 0;
-        const exhibitionName = "Proof Of X 2";
+        const exhibitionName = "Proof of X 2023";
         const startTime = currentTimestampInSeconds;
         const endTime = currentTimestampInSeconds + (60 * 60 * 24 * 7);
         const txSetExhibition = await proofOfX.setExhibition(exhibitionIndex, exhibitionName, startTime, endTime, renderer.address);
@@ -25,11 +26,12 @@ describe("Deploy", function () {
 
         describe("Mint by owner", function () {
           it("should success", async function () {
-            const name = "PoX太郎";
+            const name = "\"PoX太郎\"";
+            const role = "Artist";
             const mintCode = "abcdef - Mint by owner";
             const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
             const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
-            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, user1.address, hash);
+            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, role, user1.address, hash);
             const txReceipt = await txMint.wait();
             expect(await txReceipt.status).to.equal(1);
             console.log(await proofOfX.tokenURI(1));
@@ -37,10 +39,11 @@ describe("Deploy", function () {
 
           it("should false - wrong owner", async function () {
             const name = "PoX太郎";
+            const role = "Artist";
             const mintCode = "abcdef - Mint by owner 2";
             const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
             const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
-            await expect(proofOfX.connect(user1).mintByOwner(exhibitionIndex, name, user1.address, hash)).to.be.revertedWith(
+            await expect(proofOfX.connect(user1).mintByOwner(exhibitionIndex, name, role, user1.address, hash)).to.be.revertedWith(
               "Ownable: caller is not the owner"
             );
           });
@@ -126,10 +129,11 @@ describe("Deploy", function () {
         describe("Get token attributes", function () {
           it("should success", async function () {
             const name = "PoX太郎 - Get token attributes";
+            const role = "";
             const mintCode = "abcdef - Get token attributes";
             const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
             const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
-            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, user2.address, hash);
+            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, role, user2.address, hash);
             const txReceipt = await txMint.wait();
             expect(await txReceipt.status).to.equal(1);
 

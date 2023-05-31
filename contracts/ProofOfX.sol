@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -11,8 +12,7 @@ import {IProofOfX} from "./interfaces/IProofOfX.sol";
 import {IRenderer} from "./interfaces/IRenderer.sol";
 import {Util} from "./Util.sol";
 
-contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
-    uint256 public totalSupply;
+contract ProofOfX is IProofOfX, ERC721, ERC721Enumerable, ERC2981, Ownable, Util {
     string public description;
     string public baseExternalUrl;
 
@@ -24,7 +24,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
     uint256 public salePrice;
     bool public saleEnabled;
 
-    constructor() ERC721("ProofOfX", "POX") {}
+    constructor() ERC721("Proof of X", "POX") {}
 
     function setExhibition(uint16 exhibitionIndex, string memory name, uint64 startTime, uint64 endTime, address rendererAddress) external onlyOwner {
         exhibitions[exhibitionIndex] = IProofOfX.Exhibition(name, startTime, endTime, rendererAddress);
@@ -52,15 +52,19 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         Address.sendValue(recipient, address(this).balance);
     }
 
-    function mintByOwner(uint16 exhibitionIndex, string memory name, address toAddress, bytes32 hash) external onlyOwner {
+    function setRole(uint256 tokenId, string memory role) external onlyOwner {
+        tokenAttributes[tokenId].role = role;
+    }
+
+    function mintByOwner(uint16 exhibitionIndex, string memory name, string memory role, address toAddress, bytes32 hash) external onlyOwner {
         require(mintedHash[hash] == false, "minted hash");
         mintedHash[hash] = true;
 
-        uint256 tokenId = ++totalSupply;
+        uint256 tokenId = totalSupply() + 1;
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), toAddress));
-        tokenAttributes[tokenId] = IProofOfX.TokenAttribute(name, minterAddress, mintedAt, bytes32ToString(seed), exhibitionIndex);
+        tokenAttributes[tokenId] = IProofOfX.TokenAttribute(name, role, minterAddress, mintedAt, seed, exhibitionIndex);
         _mint(toAddress, tokenId);
     }
 
@@ -70,11 +74,11 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         require(mintedHash[hash] == false, "minted hash");
         mintedHash[hash] = true;
 
-        uint256 tokenId = ++totalSupply;
+        uint256 tokenId = totalSupply() + 1;
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), minterAddress));
-        tokenAttributes[tokenId] = IProofOfX.TokenAttribute(name, minterAddress, mintedAt, bytes32ToString(seed), exhibitionIndex);
+        tokenAttributes[tokenId] = IProofOfX.TokenAttribute(name, "", minterAddress, mintedAt, seed, exhibitionIndex);
         _mint(_msgSender(), tokenId);
     }
 
@@ -82,12 +86,11 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         require(saleEnabled, "not on sale");
         require(msg.value == salePrice, "invalid value");
 
-        uint256 tokenId = ++totalSupply;
-        string memory name = "Anonymous";
+        uint256 tokenId = totalSupply() + 1;
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), toAddress));
-        tokenAttributes[tokenId] = IProofOfX.TokenAttribute(name, minterAddress, mintedAt, bytes32ToString(seed), saleExhibitionIndex);
+        tokenAttributes[tokenId] = IProofOfX.TokenAttribute("", "", minterAddress, mintedAt, seed, saleExhibitionIndex);
         _mint(toAddress, tokenId);
     }
 
@@ -102,7 +105,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         IRenderer renderer = IRenderer(exhibition.rendererAddress);
         return
             string.concat(
-                '{"name":"Proof of X: Exhibition Attendee #',
+                '{"name":"Proof of X #',
                 Strings.toString(tokenId),
                 '","description":"',
                 description,
@@ -120,18 +123,24 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
                 '"},{"display_type":"date","trait_type":"Exhibition End Time","value":"',
                 Strings.toString(uint256(exhibition.endTime)),
                 '"},{"trait_type":"Name","value":"',
-                tokenAttribute.name,
+                escapeString(tokenAttribute.name),
+                '"},{"trait_type":"Role","value":"',
+                tokenAttribute.role,
                 '"},{"trait_type":"Minter Address","value":"',
                 Strings.toHexString(tokenAttribute.minterAddress),
                 '"},{"display_type":"date","trait_type":"Minted At","value":"',
                 Strings.toString(uint256(tokenAttribute.mintedAt)),
                 '"},{"trait_type":"Seed","value":"',
-                "0x", tokenAttribute.seed,
+                "0x", bytes32ToString(tokenAttribute.seed),
                 '"}]}'
             );
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC2981) returns (bool) {
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize) internal override(ERC721, ERC721Enumerable) {
+        super._beforeTokenTransfer(from, to, tokenId, batchSize);
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721Enumerable, ERC2981) returns (bool) {
         return ERC721.supportsInterface(interfaceId) || super.supportsInterface(interfaceId);
     }
 

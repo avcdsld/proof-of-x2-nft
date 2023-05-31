@@ -1,8 +1,10 @@
 import { ethers } from "hardhat";
 
 async function main() {
+  const imageBaseUrl = "https://ara.mypinata.cloud/ipfs/QmdvFCsYyUdf3W8qS9neWKA3Cc8SZoSpdCnB2ErcLvnBDD/#";
+  const dataBaseUrl = "https://ara.mypinata.cloud/ipfs/QmTJ525CheYELeiuPiBWTczrEt7bn8ExgqAAHv4HcLzRqn/";
   const Renderer = await ethers.getContractFactory("Renderer");
-  const renderer = await Renderer.deploy();
+  const renderer = await Renderer.deploy(imageBaseUrl, dataBaseUrl);
   await renderer.deployed();
   console.log(`Renderer deployed to ${renderer.address}`);
 

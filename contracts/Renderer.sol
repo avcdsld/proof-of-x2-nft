@@ -7,17 +7,17 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import {IRenderer} from "./interfaces/IRenderer.sol";
 import {IProofOfX} from "./interfaces/IProofOfX.sol";
+import {Util} from "./Util.sol";
 
-contract Renderer is IRenderer, Ownable {
+contract Renderer is IRenderer, Ownable, Util {
     string public imageBaseUrl;
     string public dataBaseUrl;
     string public scriptPath;
     string public cssPath;
 
-    constructor() {
-        // TODO: update
-        imageBaseUrl = "https://bafybeict7ckaknrmk24erku33ip5brq3nw7r2rj35pjhbbfcy4kxhfcfvq.ipfs.nftstorage.link/#";
-        dataBaseUrl = "https://ara.mypinata.cloud/ipfs/QmVuLuULVHMJjJS9Mu5FeYMuFpFcRJEnU92LpYMwiuUUBx/";
+    constructor(string memory _imageBaseUrl, string memory _dataBaseUrl) {
+        imageBaseUrl = _imageBaseUrl;
+        dataBaseUrl = _dataBaseUrl;
         scriptPath = "js/mainvisual.js";
         cssPath = "css/mainvisual.css";
     }
@@ -46,8 +46,9 @@ contract Renderer is IRenderer, Ownable {
             "<title>PROOF OF X</title>",
             '\n<script type="text/javascript">\n',
             "var attribute = {\n",
-            '  hash: "0x', tokenAttribute.seed, '",\n',
-            '  name: "', tokenAttribute.name, '",\n', // TODO: escape
+            '  hash: "0x', bytes32ToString(tokenAttribute.seed), '",\n',
+            '  name: "', getName(tokenAttribute.name), '",\n',
+            '  role: "', tokenAttribute.role, '",\n',
             '  mintedAt: ', Strings.toString(uint256(tokenAttribute.mintedAt)), "\n",
             "}\n",
             "</script>\n",
@@ -64,5 +65,12 @@ contract Renderer is IRenderer, Ownable {
             "</html>"
         );
         return string.concat("data:text/html;charset=UTF-8;base64,", Base64.encode(bytes(imageData)));
+    }
+
+    function getName(string memory name) private pure returns (string memory) {
+        if (bytes(name).length == 0) {
+            return "Anonymous";
+        }
+        return escapeString(name);
     }
 }

@@ -24,4 +24,16 @@ contract Util {
             return bytes1(_uint8 + 87);
         }
     }
+
+    function escapeString(string memory str) public pure returns (string memory) {
+        bytes memory strBytes = bytes(str);
+        bytes memory result = new bytes(strBytes.length);
+        for (uint i = 0; i < strBytes.length; i++) {
+            result[i] = strBytes[i];
+            if (result[i] == bytes('"')[0]) {
+                result[i] = bytes("'")[0];
+            }
+        }
+        return string(result);
+    }
 }
