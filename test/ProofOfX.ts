@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 
 describe("Deploy", function () {
   it("should success", async function () {
-    const [deployer, user1, user2] = await ethers.getSigners();
+    const [deployer, minter, user1, user2] = await ethers.getSigners();
 
     const imageBaseUrl = "https://ara.mypinata.cloud/ipfs/QmdvFCsYyUdf3W8qS9neWKA3Cc8SZoSpdCnB2ErcLvnBDD/#";
     const dataBaseUrl = "https://ara.mypinata.cloud/ipfs/QmTJ525CheYELeiuPiBWTczrEt7bn8ExgqAAHv4HcLzRqn/";
@@ -13,7 +13,7 @@ describe("Deploy", function () {
     const ProofOfX = await ethers.getContractFactory("ProofOfX");
     const proofOfX = await ProofOfX.deploy();
 
-    const txSetMinter = await proofOfX.setMinter(deployer.address);
+    const txSetMinter = await proofOfX.setMinter(minter.address);
     const txReceipt = await txSetMinter.wait();
     expect(await txReceipt.status).to.equal(1);
 
@@ -59,7 +59,7 @@ describe("Deploy", function () {
             const mintCode = "abcdef - Mint by user";
             const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
             const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
-            const sig = await deployer.signMessage(ethers.utils.arrayify(hash));
+            const sig = await minter.signMessage(ethers.utils.arrayify(hash));
             const txMint = await proofOfX.connect(user1).mint(exhibitionIndex, name, mintCodeHash, hash, sig);
             const txReceipt = await txMint.wait();
             expect(await txReceipt.status).to.equal(1);
@@ -75,11 +75,15 @@ describe("Deploy", function () {
             const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
             const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
             const invalidHash = ethers.utils.solidityKeccak256(["string"], ["for invalid sig"]);
-            const invalidSig = await deployer.signMessage(ethers.utils.arrayify(invalidHash));
+            const invalidSig = await minter.signMessage(ethers.utils.arrayify(invalidHash));
+            const invalidSigSigner = await deployer.signMessage(ethers.utils.arrayify(hash));
             await expect(proofOfX.connect(user1).mint(exhibitionIndex, name, mintCodeHash, invalidHash, invalidSig)).to.be.revertedWith(
               "invalid hash"
             );
             await expect(proofOfX.connect(user1).mint(exhibitionIndex, name, mintCodeHash, hash, invalidSig)).to.be.revertedWith(
+              "invalid sig"
+            );
+            await expect(proofOfX.connect(user1).mint(exhibitionIndex, name, mintCodeHash, hash, invalidSigSigner)).to.be.revertedWith(
               "invalid sig"
             );
           });
