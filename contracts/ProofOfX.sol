@@ -2,7 +2,6 @@
 pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -12,7 +11,8 @@ import {IProofOfX} from "./interfaces/IProofOfX.sol";
 import {IRenderer} from "./interfaces/IRenderer.sol";
 import {Util} from "./Util.sol";
 
-contract ProofOfX is IProofOfX, ERC721, ERC721Enumerable, ERC2981, Ownable, Util {
+contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
+    uint256 public totalSupply;
     string public description;
     string public baseExternalUrl;
 
@@ -65,7 +65,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC721Enumerable, ERC2981, Ownable, Util
         require(mintedHash[hash] == false, "minted hash");
         mintedHash[hash] = true;
 
-        uint256 tokenId = totalSupply() + 1;
+        uint256 tokenId = ++totalSupply;
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), toAddress));
@@ -79,7 +79,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC721Enumerable, ERC2981, Ownable, Util
         require(mintedHash[hash] == false, "minted hash");
         mintedHash[hash] = true;
 
-        uint256 tokenId = totalSupply() + 1;
+        uint256 tokenId = ++totalSupply;
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), minterAddress));
@@ -91,7 +91,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC721Enumerable, ERC2981, Ownable, Util
         require(saleEnabled, "not on sale");
         require(msg.value == salePrice, "invalid value");
 
-        uint256 tokenId = totalSupply() + 1;
+        uint256 tokenId = ++totalSupply;
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), toAddress));
@@ -141,11 +141,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC721Enumerable, ERC2981, Ownable, Util
             );
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize) internal override(ERC721, ERC721Enumerable) {
-        super._beforeTokenTransfer(from, to, tokenId, batchSize);
-    }
-
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721Enumerable, ERC2981) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC2981) returns (bool) {
         return ERC721.supportsInterface(interfaceId) || super.supportsInterface(interfaceId);
     }
 
