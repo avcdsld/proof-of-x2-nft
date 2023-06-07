@@ -13,6 +13,10 @@ describe("Deploy", function () {
     const ProofOfX = await ethers.getContractFactory("ProofOfX");
     const proofOfX = await ProofOfX.deploy();
 
+    const txSetMinter = await proofOfX.setMinter(deployer.address);
+    const txReceipt = await txSetMinter.wait();
+    expect(await txReceipt.status).to.equal(1);
+
     describe("Set exhibition", function () {
       it("should success", async function () {
         const currentTimestampInSeconds = Math.round(Date.now() / 1000);

@@ -23,6 +23,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC721Enumerable, ERC2981, Ownable, Util
     uint16 public saleExhibitionIndex;
     uint256 public salePrice;
     bool public saleEnabled;
+    address public minter;
 
     constructor() ERC721("Proof of X", "POX") {}
 
@@ -48,6 +49,10 @@ contract ProofOfX is IProofOfX, ERC721, ERC721Enumerable, ERC2981, Ownable, Util
         saleEnabled = enabled;
     }
 
+    function setMinter(address newMinter) external onlyOwner {
+        minter = newMinter;
+    }
+
     function withdrawETH(address payable recipient) external onlyOwner {
         Address.sendValue(recipient, address(this).balance);
     }
@@ -70,7 +75,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC721Enumerable, ERC2981, Ownable, Util
 
     function mint(uint16 exhibitionIndex, string memory name, bytes32 mintCodeHash, bytes32 hash, bytes memory sig) external {
         require(keccak256(abi.encodePacked(_msgSender(), mintCodeHash)) == hash, "invalid hash");
-        require(ECDSA.recover(ECDSA.toEthSignedMessageHash(hash), sig) == owner(), "invalid sig");
+        require(ECDSA.recover(ECDSA.toEthSignedMessageHash(hash), sig) == minter, "invalid sig");
         require(mintedHash[hash] == false, "minted hash");
         mintedHash[hash] = true;
 
