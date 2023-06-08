@@ -65,7 +65,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         require(mintedHash[hash] == false, "minted hash");
         mintedHash[hash] = true;
 
-        uint256 tokenId = ++totalSupply;
+        uint256 tokenId = ++totalSupply + (exhibitionIndex * 1000000);
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), toAddress));
@@ -82,7 +82,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         require(mintedHash[hash] == false, "minted hash");
         mintedHash[hash] = true;
 
-        uint256 tokenId = ++totalSupply;
+        uint256 tokenId = ++totalSupply + (exhibitionIndex * 1000000);
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), minterAddress));
@@ -94,7 +94,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         require(saleEnabled, "not on sale");
         require(msg.value == salePrice, "invalid value");
 
-        uint256 tokenId = ++totalSupply;
+        uint256 tokenId = ++totalSupply + (saleExhibitionIndex * 1000000);
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), toAddress));

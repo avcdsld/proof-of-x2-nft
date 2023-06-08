@@ -39,7 +39,8 @@ describe("Deploy", function () {
             const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, role, user1.address, hash, withPermit);
             const txReceipt = await txMint.wait();
             expect(await txReceipt.status).to.equal(1);
-            console.log(await proofOfX.tokenURI(1));
+            const tokenId = txReceipt.events![0].args!.tokenId;
+            console.log(await proofOfX.tokenURI(tokenId));
           });
 
           it("should success - with permit", async function () {
@@ -170,7 +171,7 @@ describe("Deploy", function () {
             const totalSupply = (await proofOfX.totalSupply()).toNumber();
             let tokenIds = [];
             for (let i = 1; i <= totalSupply; i++) {
-              tokenIds.push(i);
+              tokenIds.push(i + exhibitionIndex * 1000000);
             }
             const result = await proofOfX.getTokenAttributes(tokenIds);
             expect(result.length).to.equal(tokenIds.length);
