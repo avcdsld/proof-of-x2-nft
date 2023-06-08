@@ -29,7 +29,7 @@ const config: HardhatUserConfig = {
       url: "https://polygon-mumbai.infura.io/v3/9f5ace8940244ed9a769e493d783fda8",
       accounts: [privateKey],
       gas: 2100000,
-      gasPrice: 130000000000,
+      gasPrice: 1300000000,
     },
     goerli: {
       url: "https://eth-goerli.g.alchemy.com/v2/qF24N93vqDHv0u-lePhcd3H5KdJxdhGm",

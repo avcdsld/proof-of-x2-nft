@@ -11,19 +11,22 @@ import {Util} from "./Util.sol";
 
 contract Renderer is IRenderer, Ownable, Util {
     string public imageBaseUrl;
+    string public imageUrlSuffix;
     string public dataBaseUrl;
     string public scriptPath;
     string public cssPath;
 
-    constructor(string memory _imageBaseUrl, string memory _dataBaseUrl) {
+    constructor(string memory _imageBaseUrl, string memory _imageUrlSuffix, string memory _dataBaseUrl) {
         imageBaseUrl = _imageBaseUrl;
+        imageUrlSuffix = _imageUrlSuffix;
         dataBaseUrl = _dataBaseUrl;
         scriptPath = "js/mainvisual.js";
         cssPath = "css/mainvisual.css";
     }
 
-    function setImageBaseUrl(string memory url) external onlyOwner {
+    function setImageUrl(string memory url, string memory suffix) external onlyOwner {
         imageBaseUrl = url;
+        imageUrlSuffix = suffix;
     }
 
     function setDataUrl(string memory _dataBaseUrl, string memory _scriptPath, string memory _cssPath) external onlyOwner {
@@ -33,7 +36,7 @@ contract Renderer is IRenderer, Ownable, Util {
     }
 
     function imageUrl(uint256 tokenId) external view returns (string memory) {
-        return string.concat(imageBaseUrl, Strings.toString(tokenId));
+        return string.concat(imageBaseUrl, Strings.toString(tokenId), imageUrlSuffix);
     }
 
     function animationUrl(uint256 /* tokenId */, IProofOfX.TokenAttribute memory tokenAttribute) external view returns (string memory) {

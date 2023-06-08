@@ -6,9 +6,10 @@ describe("Deploy", function () {
     const [deployer, minter, user1, user2] = await ethers.getSigners();
 
     const imageBaseUrl = "https://ara.mypinata.cloud/ipfs/QmdvFCsYyUdf3W8qS9neWKA3Cc8SZoSpdCnB2ErcLvnBDD/#";
+    const imageUrlSuffix = "";
     const dataBaseUrl = "https://ara.mypinata.cloud/ipfs/QmTJ525CheYELeiuPiBWTczrEt7bn8ExgqAAHv4HcLzRqn/";
     const Renderer = await ethers.getContractFactory("Renderer");
-    const renderer = await Renderer.deploy(imageBaseUrl, dataBaseUrl);
+    const renderer = await Renderer.deploy(imageBaseUrl, imageUrlSuffix, dataBaseUrl);
 
     const ProofOfX = await ethers.getContractFactory("ProofOfX");
     const proofOfX = await ProofOfX.deploy();
@@ -20,8 +21,8 @@ describe("Deploy", function () {
     describe("Set exhibition", function () {
       it("should success", async function () {
         const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-        const exhibitionIndex = 0;
-        const exhibitionName = "Proof of X 2023";
+        const exhibitionIndex = 1;
+        const exhibitionName = "Proof of X";
         const startTime = currentTimestampInSeconds;
         const endTime = currentTimestampInSeconds + (60 * 60 * 24 * 7);
         const txSetExhibition = await proofOfX.setExhibition(exhibitionIndex, exhibitionName, startTime, endTime, renderer.address);
