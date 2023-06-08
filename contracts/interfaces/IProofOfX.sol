@@ -30,7 +30,7 @@ interface IProofOfX {
 
     function withdrawETH(address payable recipient) external;
 
-    function mintByOwner(uint16 exhibitionIndex, string memory name, string memory role, address toAddress, bytes32 hash) external;
+    function mintByOwner(uint16 exhibitionIndex, string memory name, string memory role, address toAddress, bytes32 hash, bool withPermit) external;
 
     function mint(uint16 exhibitionIndex, string memory name, bytes32 mintCodeHash, bytes32 hash, bytes memory sig) external;
 

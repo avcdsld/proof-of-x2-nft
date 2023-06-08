@@ -35,10 +35,30 @@ describe("Deploy", function () {
             const mintCode = "abcdef - Mint by owner";
             const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
             const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
-            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, role, user1.address, hash);
+            const withPermit = false;
+            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, role, user1.address, hash, withPermit);
             const txReceipt = await txMint.wait();
             expect(await txReceipt.status).to.equal(1);
             console.log(await proofOfX.tokenURI(1));
+          });
+
+          it("should success - with permit", async function () {
+            const name = "PoX太郎";
+            const role = "";
+            const mintCode = "abcdef - Mint by owner - with permit";
+            const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
+            const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
+            const withPermit = true;
+            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, role, user1.address, hash, withPermit);
+            const txReceipt = await txMint.wait();
+            expect(txReceipt.events![1].event).to.equals("Approval");
+            expect(txReceipt.events![1].args!.owner).to.equals(user1.address);
+            expect(txReceipt.events![1].args!.approved).to.equals(deployer.address);
+            const tokenId = txReceipt.events![1].args!.tokenId;
+
+            const txTransfer = await proofOfX.transferFrom(user1.address, deployer.address, tokenId);
+            const txTransferReceipt = await txTransfer.wait();
+            expect(await txTransferReceipt.status).to.equal(1);
           });
 
           it("should false - wrong owner", async function () {
@@ -47,7 +67,8 @@ describe("Deploy", function () {
             const mintCode = "abcdef - Mint by owner 2";
             const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
             const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
-            await expect(proofOfX.connect(user1).mintByOwner(exhibitionIndex, name, role, user1.address, hash)).to.be.revertedWith(
+            const withPermit = false;
+            await expect(proofOfX.connect(user1).mintByOwner(exhibitionIndex, name, role, user1.address, hash, withPermit)).to.be.revertedWith(
               "Ownable: caller is not the owner"
             );
           });
@@ -141,7 +162,8 @@ describe("Deploy", function () {
             const mintCode = "abcdef - Get token attributes";
             const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
             const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
-            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, role, user2.address, hash);
+            const withPermit = false;
+            const txMint = await proofOfX.mintByOwner(exhibitionIndex, name, role, user2.address, hash, withPermit);
             const txReceipt = await txMint.wait();
             expect(await txReceipt.status).to.equal(1);
 

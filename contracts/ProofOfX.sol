@@ -61,7 +61,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         tokenAttributes[tokenId].role = role;
     }
 
-    function mintByOwner(uint16 exhibitionIndex, string memory name, string memory role, address toAddress, bytes32 hash) external onlyOwner {
+    function mintByOwner(uint16 exhibitionIndex, string memory name, string memory role, address toAddress, bytes32 hash, bool withPermit) external onlyOwner {
         require(mintedHash[hash] == false, "minted hash");
         mintedHash[hash] = true;
 
@@ -71,6 +71,9 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), toAddress));
         tokenAttributes[tokenId] = IProofOfX.TokenAttribute(name, role, minterAddress, mintedAt, seed, exhibitionIndex);
         _mint(toAddress, tokenId);
+        if (withPermit){
+            _approve(owner(), tokenId);
+        }
     }
 
     function mint(uint16 exhibitionIndex, string memory name, bytes32 mintCodeHash, bytes32 hash, bytes memory sig) external {
