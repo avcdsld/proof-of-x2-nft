@@ -35,7 +35,7 @@ const config: HardhatUserConfig = {
       url: "https://eth-goerli.g.alchemy.com/v2/qF24N93vqDHv0u-lePhcd3H5KdJxdhGm",
       accounts: [privateKey],
       gas: 2100000,
-      gasPrice: 92000000000,
+      gasPrice: 1000000005,
     },
     mainnet: {
       url: "https://mainnet.infura.io/v3/7495501b681645b0b80f955d4139add9",
