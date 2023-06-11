@@ -1,0 +1,22 @@
+  #mainvisual_webgl{
+    margin:0;
+    padding:0;
+    vertical-align:bottom;
+  }
+  .mainvisual_container{
+    background-color: #000;
+  }
+  #mainvisual_title{
+    position: absolute;
+    top: 50px;
+    left: 0;
+    z-index: 20;
+    color: #000;
+    font-size: 12px;
+    width: 100%;
+    background-color: rgba(0,0,0,0);
+    padding: 10px;
+    text-align: center;
+    /*text-align: justify;
+    text-align-last: justify;*/
+  }
