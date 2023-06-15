@@ -25,7 +25,7 @@ contract ProofOfVisit is IProofOfVisit, ERC721, ERC2981, Ownable, Util {
     bool public saleEnabled;
     address public minter;
 
-    constructor() ERC721("Proof of X", "POX") {}
+    constructor() ERC721("Proof of Visit", "POV") {}
 
     function setExhibition(uint16 exhibitionIndex, string memory name, uint64 startTime, uint64 endTime, address rendererAddress) external onlyOwner {
         exhibitions[exhibitionIndex] = IProofOfVisit.Exhibition(name, startTime, endTime, rendererAddress);
@@ -113,7 +113,7 @@ contract ProofOfVisit is IProofOfVisit, ERC721, ERC2981, Ownable, Util {
         IRenderer renderer = IRenderer(exhibition.rendererAddress);
         return
             string.concat(
-                '{"name":"Proof of X #',
+                '{"name":"Proof of Visit #',
                 Strings.toString(tokenId),
                 '","description":"',
                 description,
