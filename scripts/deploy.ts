@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 async function main() {
   const imageBaseUrl = "https://ara.mypinata.cloud/ipfs/QmdvFCsYyUdf3W8qS9neWKA3Cc8SZoSpdCnB2ErcLvnBDD/#";
   const imageUrlSuffix = "";
-  const dataBaseUrl = "https://ara.mypinata.cloud/ipfs/QmTJ525CheYELeiuPiBWTczrEt7bn8ExgqAAHv4HcLzRqn/";
+  const dataBaseUrl = "https://ara.mypinata.cloud/ipfs/QmeRPLFySAHpP8neTFqNebyP3afhtmEikxkf678CKKTHUa/";
   const Renderer = await ethers.getContractFactory("Renderer");
   const renderer = await Renderer.deploy(imageBaseUrl, imageUrlSuffix, dataBaseUrl);
   await renderer.deployed();
