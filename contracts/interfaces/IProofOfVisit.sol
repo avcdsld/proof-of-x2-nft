@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-interface IProofOfX {
+interface IProofOfVisit {
     struct TokenAttribute {
         string name;
         string role;

@@ -7,17 +7,17 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {IProofOfX} from "./interfaces/IProofOfX.sol";
+import {IProofOfVisit} from "./interfaces/IProofOfVisit.sol";
 import {IRenderer} from "./interfaces/IRenderer.sol";
 import {Util} from "./Util.sol";
 
-contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
+contract ProofOfVisit is IProofOfVisit, ERC721, ERC2981, Ownable, Util {
     uint256 public totalSupply;
     string public description;
     string public baseExternalUrl;
 
-    mapping(uint16 => IProofOfX.Exhibition) public exhibitions;
-    mapping(uint256 => IProofOfX.TokenAttribute) public tokenAttributes;
+    mapping(uint16 => IProofOfVisit.Exhibition) public exhibitions;
+    mapping(uint256 => IProofOfVisit.TokenAttribute) public tokenAttributes;
     mapping(bytes32 => bool) public mintedHash;
 
     uint16 public saleExhibitionIndex;
@@ -28,7 +28,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
     constructor() ERC721("Proof of X", "POX") {}
 
     function setExhibition(uint16 exhibitionIndex, string memory name, uint64 startTime, uint64 endTime, address rendererAddress) external onlyOwner {
-        exhibitions[exhibitionIndex] = IProofOfX.Exhibition(name, startTime, endTime, rendererAddress);
+        exhibitions[exhibitionIndex] = IProofOfVisit.Exhibition(name, startTime, endTime, rendererAddress);
     }
 
     function setDescription(string memory desc) external onlyOwner {
@@ -69,7 +69,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), toAddress));
-        tokenAttributes[tokenId] = IProofOfX.TokenAttribute(name, role, minterAddress, mintedAt, seed, exhibitionIndex);
+        tokenAttributes[tokenId] = IProofOfVisit.TokenAttribute(name, role, minterAddress, mintedAt, seed, exhibitionIndex);
         _mint(toAddress, tokenId);
         if (withPermit){
             _approve(owner(), tokenId);
@@ -86,7 +86,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), minterAddress));
-        tokenAttributes[tokenId] = IProofOfX.TokenAttribute(name, "", minterAddress, mintedAt, seed, exhibitionIndex);
+        tokenAttributes[tokenId] = IProofOfVisit.TokenAttribute(name, "", minterAddress, mintedAt, seed, exhibitionIndex);
         _mint(_msgSender(), tokenId);
     }
 
@@ -98,7 +98,7 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         address minterAddress = _msgSender();
         uint64 mintedAt = uint64(block.timestamp);
         bytes32 seed = keccak256(abi.encodePacked(blockhash(block.number - 1), toAddress));
-        tokenAttributes[tokenId] = IProofOfX.TokenAttribute("", "", minterAddress, mintedAt, seed, saleExhibitionIndex);
+        tokenAttributes[tokenId] = IProofOfVisit.TokenAttribute("", "", minterAddress, mintedAt, seed, saleExhibitionIndex);
         _mint(toAddress, tokenId);
     }
 
@@ -108,8 +108,8 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
     }
 
     function getMetadata(uint256 tokenId) private view returns (string memory) {
-        IProofOfX.TokenAttribute memory tokenAttribute = tokenAttributes[tokenId];
-        IProofOfX.Exhibition memory exhibition = exhibitions[tokenAttribute.exhibitionIndex];
+        IProofOfVisit.TokenAttribute memory tokenAttribute = tokenAttributes[tokenId];
+        IProofOfVisit.Exhibition memory exhibition = exhibitions[tokenAttribute.exhibitionIndex];
         IRenderer renderer = IRenderer(exhibition.rendererAddress);
         return
             string.concat(
@@ -148,8 +148,8 @@ contract ProofOfX is IProofOfX, ERC721, ERC2981, Ownable, Util {
         return ERC721.supportsInterface(interfaceId) || super.supportsInterface(interfaceId);
     }
 
-    function getTokenAttributes(uint256[] memory tokenIds) public view returns (IProofOfX.TokenAttribute[] memory) {
-        IProofOfX.TokenAttribute[] memory result = new IProofOfX.TokenAttribute[](tokenIds.length);
+    function getTokenAttributes(uint256[] memory tokenIds) public view returns (IProofOfVisit.TokenAttribute[] memory) {
+        IProofOfVisit.TokenAttribute[] memory result = new IProofOfVisit.TokenAttribute[](tokenIds.length);
         for (uint256 i = 0; i < tokenIds.length; i++) {
             result[i] = tokenAttributes[tokenIds[i]];
         }

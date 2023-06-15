@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import {IRenderer} from "./interfaces/IRenderer.sol";
-import {IProofOfX} from "./interfaces/IProofOfX.sol";
+import {IProofOfVisit} from "./interfaces/IProofOfVisit.sol";
 import {Util} from "./Util.sol";
 
 contract Renderer is IRenderer, Ownable, Util {
@@ -39,7 +39,7 @@ contract Renderer is IRenderer, Ownable, Util {
         return string.concat(imageBaseUrl, Strings.toString(tokenId), imageUrlSuffix);
     }
 
-    function animationUrl(uint256 /* tokenId */, IProofOfX.TokenAttribute memory tokenAttribute) external view returns (string memory) {
+    function animationUrl(uint256 /* tokenId */, IProofOfVisit.TokenAttribute memory tokenAttribute) external view returns (string memory) {
         string memory imageData = string.concat(
             "<!DOCTYPE html>",
             '<html lang="en">',
