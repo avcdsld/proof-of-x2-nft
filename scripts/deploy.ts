@@ -1,6 +1,11 @@
 import { ethers } from "hardhat";
 
 async function main() {
+  const ProofOfVisit = await ethers.getContractFactory("ProofOfVisit");
+  const proofOfVisit = await ProofOfVisit.deploy();
+  await proofOfVisit.deployed();
+  console.log(`ProofOfVisit deployed to ${proofOfVisit.address}`);
+
   const imageBaseUrl = "https://ara.mypinata.cloud/ipfs/QmdvFCsYyUdf3W8qS9neWKA3Cc8SZoSpdCnB2ErcLvnBDD/#";
   const imageUrlSuffix = "";
   const dataBaseUrl = "https://ara.mypinata.cloud/ipfs/QmeRPLFySAHpP8neTFqNebyP3afhtmEikxkf678CKKTHUa/";
@@ -8,11 +13,6 @@ async function main() {
   const renderer = await Renderer.deploy(imageBaseUrl, imageUrlSuffix, dataBaseUrl);
   await renderer.deployed();
   console.log(`Renderer deployed to ${renderer.address}`);
-
-  const ProofOfVisit = await ethers.getContractFactory("ProofOfVisit");
-  const proofOfVisit = await ProofOfVisit.deploy();
-  await proofOfVisit.deployed();
-  console.log(`ProofOfVisit deployed to ${proofOfVisit.address}`);
 
   const exhibitionIndex = 1;
   const exhibitionName = "Proof of X";
