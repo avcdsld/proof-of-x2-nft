@@ -35,4 +35,6 @@ interface IProofOfVisit {
     function mint(uint16 exhibitionIndex, string memory name, bytes32 mintCodeHash, bytes32 hash, bytes memory sig) external;
 
     function buy(address toAddress) external payable;
+
+    function getTokenAttributes(uint256[] memory tokenIds) external view returns (IProofOfVisit.TokenAttribute[] memory);
 }

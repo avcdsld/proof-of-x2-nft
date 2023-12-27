@@ -5,14 +5,19 @@ describe("Deploy", function () {
   it("should success", async function () {
     const [deployer, minter, user1, user2] = await ethers.getSigners();
 
+    const ProofOfVisit = await ethers.getContractFactory("ProofOfVisit");
+    const proofOfVisit = await ProofOfVisit.deploy();
+
     const imageBaseUrl = "https://ara.mypinata.cloud/ipfs/QmdvFCsYyUdf3W8qS9neWKA3Cc8SZoSpdCnB2ErcLvnBDD/#";
     const imageUrlSuffix = "";
     const dataBaseUrl = "https://ara.mypinata.cloud/ipfs/QmeRPLFySAHpP8neTFqNebyP3afhtmEikxkf678CKKTHUa/";
     const Renderer = await ethers.getContractFactory("Renderer");
     const renderer = await Renderer.deploy(imageBaseUrl, imageUrlSuffix, dataBaseUrl);
 
-    const ProofOfVisit = await ethers.getContractFactory("ProofOfVisit");
-    const proofOfVisit = await ProofOfVisit.deploy();
+    const imageBaseUrlDigShibuya = "https://ara.mypinata.cloud/ipfs/QmVwswDC89AKBybNUCo6j2yu7kCT9Qn3TuRX4gCqkTQ4fY/";
+    const imageUrlSuffixDigShibuya = ".gif";
+    const RendererDigShibuya = await ethers.getContractFactory("RendererDigShibuya");
+    const rendererDigShibuya = await RendererDigShibuya.deploy(imageBaseUrlDigShibuya, imageUrlSuffixDigShibuya, proofOfVisit.address);
 
     const txSetMinter = await proofOfVisit.setMinter(minter.address);
     const txReceipt = await txSetMinter.wait();
@@ -70,8 +75,9 @@ describe("Deploy", function () {
             const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
             const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
             const withPermit = false;
-            await expect(proofOfVisit.connect(user1).mintByOwner(exhibitionIndex, name, role, user1.address, hash, withPermit)).to.be.revertedWith(
-              "Ownable: caller is not the owner"
+            await expect(proofOfVisit.connect(user1).mintByOwner(exhibitionIndex, name, role, user1.address, hash, withPermit)).to.be.revertedWithCustomError(
+              proofOfVisit,
+              "OwnableUnauthorizedAccount"
             );
           });
         });
@@ -150,8 +156,9 @@ describe("Deploy", function () {
             });
 
             it("should false - not owner", async function () {
-              await expect(proofOfVisit.connect(user1).withdrawETH(user1.address)).to.be.revertedWith(
-                "Ownable: caller is not the owner"
+              await expect(proofOfVisit.connect(user1).withdrawETH(user1.address)).to.be.revertedWithCustomError(
+                proofOfVisit,
+                "OwnableUnauthorizedAccount"
               );
             });
           });
@@ -177,6 +184,35 @@ describe("Deploy", function () {
             const result = await proofOfVisit.getTokenAttributes(tokenIds);
             expect(result.length).to.equal(tokenIds.length);
             expect(result[tokenIds.length - 1].name).to.equal(name);
+          });
+        });
+      });
+    });
+
+    describe("DIG SHIBUYA - Set exhibition", function () {
+      it("should success", async function () {
+        const currentTimestampInSeconds = Math.round(Date.now() / 1000);
+        const exhibitionIndex = 2;
+        const exhibitionName = "Proof of X in DIG SHIBUYA";
+        const startTime = currentTimestampInSeconds;
+        const endTime = currentTimestampInSeconds + (60 * 60 * 24 * 7);
+        const txSetExhibition = await proofOfVisit.setExhibition(exhibitionIndex, exhibitionName, startTime, endTime, rendererDigShibuya.address);
+        const txReceipt = await txSetExhibition.wait();
+        expect(await txReceipt.status).to.equal(1);
+
+        describe("DIG SHIBUYA - Mint by owner", function () {
+          it("should success", async function () {
+            const name = "\"PoX太郎\"";
+            const role = "Artist";
+            const mintCode = "abcdef - Mint by owner - DIG SHIBUYA";
+            const mintCodeHash = ethers.utils.solidityKeccak256(["string"], [mintCode]);
+            const hash = ethers.utils.solidityKeccak256(["address", "bytes32"], [user1.address, mintCodeHash]);
+            const withPermit = false;
+            const txMint = await proofOfVisit.mintByOwner(exhibitionIndex, name, role, user1.address, hash, withPermit);
+            const txReceipt = await txMint.wait();
+            expect(await txReceipt.status).to.equal(1);
+            const tokenId = txReceipt.events![0].args!.tokenId;
+            console.log(await proofOfVisit.tokenURI(tokenId));
           });
         });
       });
