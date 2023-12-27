@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.22;
 
 contract Util {
     function bytes32ToString(bytes32 _bytes32) public pure returns (string memory) {

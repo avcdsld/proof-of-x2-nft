@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {IProofOfVisit} from "./interfaces/IProofOfVisit.sol";
 import {IRenderer} from "./interfaces/IRenderer.sol";
 import {Util} from "./Util.sol";
@@ -25,7 +26,7 @@ contract ProofOfVisit is IProofOfVisit, ERC721, ERC2981, Ownable, Util {
     bool public saleEnabled;
     address public minter;
 
-    constructor() ERC721("Proof of Visit", "POV") {}
+    constructor() ERC721("Proof of Visit", "POV") Ownable(_msgSender()) {}
 
     function setExhibition(uint16 exhibitionIndex, string memory name, uint64 startTime, uint64 endTime, address rendererAddress) external onlyOwner {
         exhibitions[exhibitionIndex] = IProofOfVisit.Exhibition(name, startTime, endTime, rendererAddress);
@@ -72,13 +73,13 @@ contract ProofOfVisit is IProofOfVisit, ERC721, ERC2981, Ownable, Util {
         tokenAttributes[tokenId] = IProofOfVisit.TokenAttribute(name, role, minterAddress, mintedAt, seed, exhibitionIndex);
         _mint(toAddress, tokenId);
         if (withPermit){
-            _approve(owner(), tokenId);
+            _approve(owner(), tokenId, address(0));
         }
     }
 
     function mint(uint16 exhibitionIndex, string memory name, bytes32 mintCodeHash, bytes32 hash, bytes memory sig) external {
         require(keccak256(abi.encodePacked(_msgSender(), mintCodeHash)) == hash, "invalid hash");
-        require(ECDSA.recover(ECDSA.toEthSignedMessageHash(hash), sig) == minter, "invalid sig");
+        require(ECDSA.recover(MessageHashUtils.toEthSignedMessageHash(hash), sig) == minter, "invalid sig");
         require(mintedHash[hash] == false, "minted hash");
         mintedHash[hash] = true;
 
@@ -103,7 +104,7 @@ contract ProofOfVisit is IProofOfVisit, ERC721, ERC2981, Ownable, Util {
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        require(_exists(tokenId), "not exists");
+        _requireOwned(tokenId);
         return string.concat("data:application/json;utf8,", getMetadata(tokenId));
     }
 

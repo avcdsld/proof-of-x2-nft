@@ -9,7 +9,7 @@ const privateKey = process.env.PRIVATE_KEY || "0x0000000000000000000000000000000
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.18",
+    version: "0.8.22",
     settings: {
       optimizer: {
         enabled: true,

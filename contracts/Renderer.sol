@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -16,7 +16,7 @@ contract Renderer is IRenderer, Ownable, Util {
     string public scriptPath;
     string public cssPath;
 
-    constructor(string memory _imageBaseUrl, string memory _imageUrlSuffix, string memory _dataBaseUrl) {
+    constructor(string memory _imageBaseUrl, string memory _imageUrlSuffix, string memory _dataBaseUrl) Ownable(_msgSender()) {
         imageBaseUrl = _imageBaseUrl;
         imageUrlSuffix = _imageUrlSuffix;
         dataBaseUrl = _dataBaseUrl;
