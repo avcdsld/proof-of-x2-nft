@@ -8,7 +8,7 @@ async function main() {
 
   const imageBaseUrl = "https://ara.mypinata.cloud/ipfs/QmdvFCsYyUdf3W8qS9neWKA3Cc8SZoSpdCnB2ErcLvnBDD/#";
   const imageUrlSuffix = "";
-  const dataBaseUrl = "https://ara.mypinata.cloud/ipfs/QmeRPLFySAHpP8neTFqNebyP3afhtmEikxkf678CKKTHUa/";
+  const dataBaseUrl = "https://ara.mypinata.cloud/ipfs/QmX1iCqD6ty8GkXzu3tbtbvjNxPADTwE3KHMnnMhYFgSQh/";
   const Renderer = await ethers.getContractFactory("Renderer");
   const renderer = await Renderer.deploy(imageBaseUrl, imageUrlSuffix, dataBaseUrl);
   await renderer.deployed();
