@@ -8,77 +8,65 @@ describe("Deploy - Proof of Donation", function () {
     const ProofOfDonation = await ethers.getContractFactory("ProofOfDonation");
     const proofOfDonation = await ProofOfDonation.deploy();
 
-    const imageUrl = "https://ara.mypinata.cloud/ipfs/QmNayMJmPnWpb4VeZ6nLT4hh5rMJUAkwboVGCiLVKq3Xkk";
-    const animationUrl = imageUrl;
-    const artworkCreator = "EXCALIBUR";
-    const minimumAmount = ethers.utils.parseUnits("0.001", "ether");
+    const ProofOfDonationRenderer = await ethers.getContractFactory("ProofOfDonationRenderer");
+    const renderer = await ProofOfDonationRenderer.deploy();
 
-    describe("Set donation", function () {
+    describe("Activate token", function () {
       it("should success", async function () {
-        const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-        const donationIndex = 1;
-        const donationName = "2024 Noto Earthquake";
-        const description = "2024 Noto Earthquake";
-        const baseExternalUrl = "https://pox.exhibit.website/#";
-        const rendererAddress = "0x0000000000000000000000000000000000000000";
-        const active = true;
-        const createdAt = currentTimestampInSeconds;
-        const txSetDonation = await proofOfDonation.setDonation(
-          donationIndex,
-          donationName,
-          description,
-          baseExternalUrl,
-          imageUrl,
-          animationUrl,
-          artworkCreator,
-          rendererAddress,
-          minimumAmount,
-          createdAt,
-          active,
-        );
-        const txReceipt = await txSetDonation.wait();
-        expect(await txReceipt.status).to.equal(1);
+        const tokenId = 1;
+        const name = "Noto Earthquake 2024";
+        const description = "Proof of Donation #1 by Proof of X project is in support of the January 2024 Noto Peninsula Earthquake in Japan. This is a memento to prove you have made a donation. All donations will be used to support the victims.";
+        const image = "https://ara.mypinata.cloud/ipfs/QmNayMJmPnWpb4VeZ6nLT4hh5rMJUAkwboVGCiLVKq3Xkk";
+        const artworkCreator = "EXCALIBUR";
+        const price = ethers.utils.parseUnits("0.001", "ether");
 
-        describe("Mint by owner", function () {
-          it("should success", async function () {
-            const name = "\"PoX太郎\"";
-            const txMint = await proofOfDonation.mintByOwner(donationIndex, name, user1.address);
-            const txReceipt = await txMint.wait();
-            expect(await txReceipt.status).to.equal(1);
-            const tokenId = txReceipt.events![0].args!.tokenId;
-            console.log(await proofOfDonation.tokenURI(tokenId));
-          });
+        await renderer.setMetadata(tokenId, name, description, image, artworkCreator);
+        const txSetRenderer = await proofOfDonation.setRenderer(renderer.address);
+        const txSetRendererReceipt = await txSetRenderer.wait();
+        expect(await txSetRendererReceipt.status).to.equal(1);
 
-          it("should false - wrong owner", async function () {
-            const name = "PoX太郎";
-            await expect(proofOfDonation.connect(user1).mintByOwner(donationIndex, name, user1.address)).to.be.revertedWithCustomError(
-              proofOfDonation,
-              "OwnableUnauthorizedAccount"
-            );
-          });
-        });
+        const txActivate = await proofOfDonation.activateToken(tokenId, price);
+        const txActivateReceipt = await txActivate.wait();
+        expect(await txActivateReceipt.status).to.equal(1);
 
         describe("Donate", function () {
           it("should success", async function () {
-            const name = "PoX太郎";
-            const value = ethers.utils.parseUnits("0.01", "ether");
-            const txDonate = await proofOfDonation.connect(user1).donate(donationIndex, name, user1.address, { value });
-            const txDonateReceipt = await txDonate.wait();
-            expect(await txDonateReceipt.status).to.equal(1);
+            const quantity = 1;
+            const value = price.mul(quantity);
+            const txDonate = await proofOfDonation.connect(user1).donate(tokenId, quantity, { value });
+            const txReceipt = await txDonate.wait();
+            expect(await txReceipt.status).to.equal(1);
+            console.log(await proofOfDonation.uri(tokenId));
           });
 
           it("should success 2", async function () {
-            const name = "PoX太郎";
-            const value = ethers.utils.parseUnits("0.01", "ether");
-            const txDonate = await proofOfDonation.connect(user1).donate(donationIndex, name, user2.address, { value });
+            const quantity = 100;
+            const value = price.mul(quantity);
+            const txDonate = await proofOfDonation.connect(user2).donate(tokenId, quantity, { value });
             const txDonateReceipt = await txDonate.wait();
             expect(await txDonateReceipt.status).to.equal(1);
           });
 
+          it("should false - not active", async function () {
+            const txDeactivate = await proofOfDonation.deactivateToken(tokenId);
+            const txDeactivateReceipt = await txDeactivate.wait();
+            expect(await txDeactivateReceipt.status).to.equal(1);
+
+            const quantity = 100;
+            const value = price.mul(quantity);
+            await expect(proofOfDonation.connect(user1).donate(tokenId, quantity, { value })).to.be.revertedWith(
+              "not active"
+            );
+
+            const txActivate = await proofOfDonation.activateToken(tokenId, price);
+            const txActivateReceipt = await txActivate.wait();
+            expect(await txActivateReceipt.status).to.equal(1);
+          });
+
           it("should false - wrong value", async function () {
-            const name = "PoX太郎";
-            const wrongValue = ethers.utils.parseUnits("0.0001", "ether");
-            await expect(proofOfDonation.connect(user1).donate(donationIndex, name, user1.address, { value: wrongValue })).to.be.revertedWith(
+            const quantity = 1;
+            const wrongValue = ethers.utils.parseUnits("0.0002", "ether");
+            await expect(proofOfDonation.connect(user1).donate(tokenId, quantity, { value: wrongValue })).to.be.revertedWith(
               "invalid value"
             );
           });
@@ -127,24 +115,6 @@ describe("Deploy - Proof of Donation", function () {
                 "OwnableUnauthorizedAccount"
               );
             });
-          });
-        });
-
-        describe("Get token attributes", function () {
-          it("should success", async function () {
-            const name = "PoX太郎 - Get token attributes";
-            const txMint = await proofOfDonation.mintByOwner(donationIndex, name, user1.address);
-            const txReceipt = await txMint.wait();
-            expect(await txReceipt.status).to.equal(1);
-
-            const totalSupply = (await proofOfDonation.totalSupply()).toNumber();
-            let tokenIds = [];
-            for (let i = 1; i <= totalSupply; i++) {
-              tokenIds.push(i + donationIndex * 1000000);
-            }
-            const result = await proofOfDonation.getTokenAttributes(tokenIds);
-            expect(result.length).to.equal(tokenIds.length);
-            expect(result[tokenIds.length - 1].name).to.equal(name);
           });
         });
       });
