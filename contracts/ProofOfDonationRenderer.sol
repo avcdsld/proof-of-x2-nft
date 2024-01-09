@@ -35,6 +35,7 @@ contract ProofOfDonationRenderer is IProofOfDonationRenderer, Ownable {
     function uri(uint256 tokenId) external view returns (string memory) {
         return
             string.concat(
+                "data:application/json;utf8,",
                 '{"name":"',
                 metadata[tokenId].name,
                 '","description":"',
