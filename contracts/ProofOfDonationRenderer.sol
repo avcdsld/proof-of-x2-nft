@@ -41,8 +41,6 @@ contract ProofOfDonationRenderer is IProofOfDonationRenderer, Ownable {
                 metadata[tokenId].description,
                 '","image":"',
                 metadata[tokenId].image,
-                // '","animation_url":"',
-                // metadata[tokenId].animationUrl,
                 '","attributes":[{"trait_type":"Artwork Creator","value":"',
                 metadata[tokenId].artworkCreator,
                 '"}]}'
