@@ -44,8 +44,8 @@ contract ProofOfDonation is IProofOfDonation, ERC1155, ERC1155Burnable, ERC1155S
         _mint(_msgSender(), tokenId, quantity, "");
     }
 
-    function remembrance(string memory message) public pure returns (bytes32) {
-        return keccak256(abi.encodePacked(message));
+    function remembrance(string memory name, string memory country, string memory message) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(name, country, message));
     }
 
     function uri(uint256 tokenId) public view virtual override returns (string memory) {
