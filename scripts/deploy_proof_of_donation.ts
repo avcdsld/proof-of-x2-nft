@@ -32,7 +32,9 @@ async function main() {
 
   const quantity = 5;
   const value = price.mul(quantity);
-  const txMint = await proofOfDonation.donate(tokenId, quantity, { value });
+  const message = "Japan - I hope this will help the victims.";
+  const remembrance = ethers.utils.solidityKeccak256(["string"], [message]);
+  const txMint = await proofOfDonation.donate(tokenId, quantity, remembrance, { value });
   const txMintReceipt= await txMint.wait();
   console.log('txMintReceipt', txMintReceipt);
 }

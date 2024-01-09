@@ -38,10 +38,14 @@ contract ProofOfDonation is IProofOfDonation, ERC1155, ERC1155Burnable, ERC1155S
         require(IERC20(tokenAddress).transfer(recipient, amount), "transfer failed");
     }
 
-    function donate(uint256 tokenId, uint256 quantity) external payable {
+    function donate(uint256 tokenId, uint256 quantity, bytes32 remembrance) external payable {
         require(activeTokens[tokenId], "not active");
         require(msg.value == prices[tokenId] * quantity, "invalid value");
         _mint(_msgSender(), tokenId, quantity, "");
+    }
+
+    function remembrance(string memory message) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(message));
     }
 
     function uri(uint256 tokenId) public view virtual override returns (string memory) {

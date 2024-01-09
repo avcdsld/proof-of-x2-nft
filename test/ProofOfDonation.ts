@@ -33,7 +33,12 @@ describe("Deploy - Proof of Donation", function () {
           it("should success", async function () {
             const quantity = 1;
             const value = price.mul(quantity);
-            const txDonate = await proofOfDonation.connect(user1).donate(tokenId, quantity, { value });
+            const message = "Japan - I hope this will help the victims.";
+            const remembrance = ethers.utils.solidityKeccak256(["string"], [message]);
+            const remembranceFromContract = await proofOfDonation.remembrance(message);
+            expect(remembranceFromContract).to.equal(remembrance);
+
+            const txDonate = await proofOfDonation.connect(user1).donate(tokenId, quantity, remembrance, { value });
             const txReceipt = await txDonate.wait();
             expect(await txReceipt.status).to.equal(1);
             console.log(await proofOfDonation.uri(tokenId));
@@ -42,7 +47,9 @@ describe("Deploy - Proof of Donation", function () {
           it("should success 2", async function () {
             const quantity = 100;
             const value = price.mul(quantity);
-            const txDonate = await proofOfDonation.connect(user2).donate(tokenId, quantity, { value });
+            const message = "Japan - I hope this will help the victims.";
+            const remembrance = ethers.utils.solidityKeccak256(["string"], [message]);
+            const txDonate = await proofOfDonation.connect(user2).donate(tokenId, quantity, remembrance, { value });
             const txDonateReceipt = await txDonate.wait();
             expect(await txDonateReceipt.status).to.equal(1);
           });
@@ -54,7 +61,9 @@ describe("Deploy - Proof of Donation", function () {
 
             const quantity = 100;
             const value = price.mul(quantity);
-            await expect(proofOfDonation.connect(user1).donate(tokenId, quantity, { value })).to.be.revertedWith(
+            const message = "Japan - I hope this will help the victims.";
+            const remembrance = ethers.utils.solidityKeccak256(["string"], [message]);            
+            await expect(proofOfDonation.connect(user1).donate(tokenId, quantity, remembrance, { value })).to.be.revertedWith(
               "not active"
             );
 
@@ -66,7 +75,9 @@ describe("Deploy - Proof of Donation", function () {
           it("should false - wrong value", async function () {
             const quantity = 1;
             const wrongValue = ethers.utils.parseUnits("0.0002", "ether");
-            await expect(proofOfDonation.connect(user1).donate(tokenId, quantity, { value: wrongValue })).to.be.revertedWith(
+            const message = "Japan - I hope this will help the victims.";
+            const remembrance = ethers.utils.solidityKeccak256(["string"], [message]);            
+            await expect(proofOfDonation.connect(user1).donate(tokenId, quantity, remembrance, { value: wrongValue })).to.be.revertedWith(
               "invalid value"
             );
           });

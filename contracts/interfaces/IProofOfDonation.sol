@@ -12,5 +12,5 @@ interface IProofOfDonation {
 
     function withdrawERC20(address tokenAddress, address recipient, uint256 amount) external;
 
-    function donate(uint256 tokenId, uint256 quantity) external payable;
+    function donate(uint256 tokenId, uint256 quantity, bytes32 remembrance) external payable;
 }
