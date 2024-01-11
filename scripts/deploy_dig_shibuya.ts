@@ -5,6 +5,8 @@ async function main() {
   const proofOfVisit = await ProofOfVisit.deploy();
   await proofOfVisit.deployed();
   console.log(`ProofOfVisit deployed to ${proofOfVisit.address}`);
+  // const ProofOfVisit = await ethers.getContractFactory("ProofOfVisit");
+  // const proofOfVisit = await ProofOfVisit.attach("0x9589669e104aa22cbc4a6341870212f5685c5ed1");
 
   const imageBaseUrlDigShibuya = "https://ara.mypinata.cloud/ipfs/QmVwswDC89AKBybNUCo6j2yu7kCT9Qn3TuRX4gCqkTQ4fY/";
   const imageUrlSuffixDigShibuya = ".gif";
@@ -16,7 +18,7 @@ async function main() {
   const exhibitionIndex = 2;
   const exhibitionName = "Proof of X - DIG SHIBUYA";
   const startTime = 1704985200; // 2024-01-12 00:00:00
-  const endTime = 1705248000; // 2024-01-15 01:00:00
+  const endTime = 1705244399; // 2024-01-14 23:59:59
   const txSetExhibition = await proofOfVisit.setExhibition(exhibitionIndex, exhibitionName, startTime, endTime, renderer.address);
   const txReceipt = await txSetExhibition.wait();
   console.log('txReceipt', txReceipt);
