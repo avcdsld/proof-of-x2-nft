@@ -15,9 +15,9 @@ for (let i = 0; i < 200; i++) {
     console.log(mintCode);
 }
 
-// // require ethers.js v6
-// const { solidityPackedKeccak256 } = require('ethers');
-// for (let i = 0; i < 2; i++) {
-//     const mintCodeHash = solidityPackedKeccak256(["string"], [mintCodes[i]]);
-//     console.log(mintCodeHash);
-// }
+// require ethers.js v6
+const { solidityPackedKeccak256 } = require('ethers');
+for (let i = 0; i < mintCodes.length; i++) {
+    const mintCodeHash = solidityPackedKeccak256(["string"], [mintCodes[i]]);
+    console.log(mintCodeHash);
+}
